@@ -17,5 +17,6 @@ volume_dataframe = volume_dataframe[columns]
 left_structures = volume_dataframe[volume_dataframe['Name of structure'].str.contains('Left')]
 right_structures = volume_dataframe[volume_dataframe['Name of structure'].str.contains('Right')]
 
+print(volume_dataframe)
 # print(left_structures)
 # print(right_structures)
