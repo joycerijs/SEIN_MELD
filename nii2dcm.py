@@ -7,6 +7,9 @@ import os
 from tqdm import tqdm
 import glob
 import difflib
+from pydicom.uid import generate_uid
+from uuid import uuid1, getnode
+import time
 
 
 def convertNsave(type, arr, dicom_dir, file_dir, index=0):
@@ -29,16 +32,17 @@ def convertNsave(type, arr, dicom_dir, file_dir, index=0):
     dicom_file.BitsAllocated = 16
     dicom_file.HighBit = 15
     dicom_file.PixelRepresentation = 1
+    # dicom_file.SeriesInstanceUID = uuid.uuid1()
     if type == 'T1':
-        dicom_file.ImageType = "MELD_T1_prediction"  # Deze geeft een warning
-        dicom_file.SeriesDescription = 'MELD_T1_prediction'
-        dicom_file.ProtocolName = 'MELD_T1_prediction'
+        dicom_file.ImageType = "Derived/secondary/MELD_T1_prediction"  # Deze geeft een warning
+        dicom_file.SeriesDescription = 'Derived/secondary/MELD_T1_prediction'
+        dicom_file.ProtocolName = 'Derived/secondary/MELD_T1_prediction'
     if type == 'FLAIR':
-        dicom_file.ImageType = "MELD_FLAIR_prediction"  # Deze geeft een warning
-        dicom_file.SeriesDescription = 'MELD_FLAIR_prediction'
-        dicom_file.ProtocolName = 'MELD_FLAIR_prediction'
+        dicom_file.ImageType = "Derived/secondary/MELD_FLAIR_prediction"  # Deze geeft een warning
+        dicom_file.SeriesDescription = 'Derived/secondary/MELD_FLAIR_prediction'
+        dicom_file.ProtocolName = 'Derived/secondary/MELD_FLAIR_prediction'
     dicom_file.PixelData = arr.tobytes()
-    dicom_file.save_as(os.path.join(file_dir, f'slice{index+1}.dcm'))
+    # dicom_file.save_as(os.path.join(file_dir, f'slice{index+1}.dcm'))
 
 
 def nifti2dicom(type, nifti_dir, dicom_dir, out_dir):
@@ -70,6 +74,8 @@ dicom_dir_FLAIR = glob.glob("f:/Documenten/Universiteit/Master_TM+_commissies/Ja
 nifti2dicom('T1', nifti_dir_T1, dicom_dir_T1, out_dir_T1)
 nifti2dicom('FLAIR', nifti_dir_FLAIR, dicom_dir_FLAIR, out_dir_FLAIR)
 
+print(uuid1())
+
 # Compare DICOM metadata
 
 # T1_map = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/map18/map18_combined_z_score - 18003/IM-0001-0001-0001.dcm'
@@ -78,9 +84,9 @@ nifti2dicom('FLAIR', nifti_dir_FLAIR, dicom_dir_FLAIR, out_dir_FLAIR)
 # datasets = tuple([pydicom.dcmread(filename, force=True)
 #                   for filename in (T1_map, T1_prediction)])
 
-# difflib compare functions require a list of lines, each terminated with
-# newline character massage the string representation of each dicom dataset
-# into this form:
+# # difflib compare functions require a list of lines, each terminated with
+# # newline character massage the string representation of each dicom dataset
+# # into this form:
 # rep = []
 # for dataset in datasets:
 #     lines = str(dataset).split("\n")
