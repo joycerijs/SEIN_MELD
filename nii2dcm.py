@@ -35,12 +35,12 @@ def convertNsave(type, arr, dicom_dir, file_dir, index=0):
     # dicom_file.SeriesInstanceUID = uuid.uuid1()
     if type == 'T1':
         dicom_file.ImageType = "Derived/secondary/MELD_T1_prediction"  # Deze geeft een warning
-        dicom_file.SeriesDescription = 'Derived/secondary/MELD_T1_prediction'
-        dicom_file.ProtocolName = 'Derived/secondary/MELD_T1_prediction'
+        dicom_file.SeriesDescription = 'MELD_T1_prediction'
+        dicom_file.ProtocolName = 'MELD_T1_prediction'
     if type == 'FLAIR':
         dicom_file.ImageType = "Derived/secondary/MELD_FLAIR_prediction"  # Deze geeft een warning
-        dicom_file.SeriesDescription = 'Derived/secondary/MELD_FLAIR_prediction'
-        dicom_file.ProtocolName = 'Derived/secondary/MELD_FLAIR_prediction'
+        dicom_file.SeriesDescription = 'MELD_FLAIR_prediction'
+        dicom_file.ProtocolName = 'MELD_FLAIR_prediction'
     dicom_file.PixelData = arr.tobytes()
     # dicom_file.save_as(os.path.join(file_dir, f'slice{index+1}.dcm'))
 
