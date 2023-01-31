@@ -7,12 +7,10 @@ import os
 from tqdm import tqdm
 import glob
 import difflib
-from pydicom.uid import generate_uid
-from uuid import uuid1, getnode
-import time
+import datetime
 
 
-def convertNsave(type, arr, dicom_dir, file_dir, index=0):
+def convertNsave(type, arr, dicom_dir, file_dir, now_series, now_study, index=0):
     """
     'type': Parameter defines if it is the T1 or FLAIR prediction
     'arr': Parameter will take a numpy array that represents only one slice.
@@ -32,15 +30,23 @@ def convertNsave(type, arr, dicom_dir, file_dir, index=0):
     dicom_file.BitsAllocated = 16
     dicom_file.HighBit = 15
     dicom_file.PixelRepresentation = 1
-    # dicom_file.SeriesInstanceUID = uuid.uuid1()
+    SeriesInstanceUID = dicom_file.SeriesInstanceUID[0:40]
     if type == 'T1':
-        dicom_file.ImageType = "Derived/secondary/MELD_T1_prediction"  # Deze geeft een warning
+        dicom_file.ImageType = "Derived/secondary/MELD_T1_prediction"
         dicom_file.SeriesDescription = 'MELD_T1_prediction'
         dicom_file.ProtocolName = 'MELD_T1_prediction'
+        dicom_file.SeriesInstanceUID = SeriesInstanceUID + now_series
+        dicom_file.SOPInstanceUID = dicom_file.SeriesInstanceUID[0:53] + (str(int(dicom_file.SeriesInstanceUID[53])+1))
+        dicom_file.file_meta.MediaStorageSOPInstanceUID = dicom_file.SOPInstanceUID
+        dicom_file.StudyInstanceUID = SeriesInstanceUID + now_study  # Datum is nu op andere volgorde. De eerste getallen van seriesinstanceUID zijn hetzelfde als van study
     if type == 'FLAIR':
-        dicom_file.ImageType = "Derived/secondary/MELD_FLAIR_prediction"  # Deze geeft een warning
+        dicom_file.ImageType = "Derived/secondary/MELD_FLAIR_prediction"
         dicom_file.SeriesDescription = 'MELD_FLAIR_prediction'
         dicom_file.ProtocolName = 'MELD_FLAIR_prediction'
+        dicom_file.SeriesInstanceUID = SeriesInstanceUID + now_series + '1'
+        dicom_file.SOPInstanceUID = dicom_file.SeriesInstanceUID[0:53] + (str(int(dicom_file.SeriesInstanceUID[53])+1)) + '1'
+        dicom_file.file_meta.MediaStorageSOPInstanceUID = dicom_file.SOPInstanceUID
+        dicom_file.StudyInstanceUID = SeriesInstanceUID + now_study + '1'
     dicom_file.PixelData = arr.tobytes()
     # dicom_file.save_as(os.path.join(file_dir, f'slice{index+1}.dcm'))
 
@@ -58,9 +64,10 @@ def nifti2dicom(type, nifti_dir, dicom_dir, out_dir):
     nifti_array_ = nifti_file.get_fdata()
     nifti_array = np.rot90(np.fliplr(nifti_array_), 1)
     number_slices = nifti_array.shape[2]
-
+    now_series = datetime.datetime.now().strftime('%Y%m%d%H%M%S') # De actuele tijd wordt 1x berekend en voor alle slices gebruikt
+    now_study = datetime.datetime.now().strftime('%S%M%H%d%m%Y')
     for slice_ in tqdm(range(number_slices)):
-        convertNsave(type, nifti_array[:, :, slice_], dicom_dir[slice_], out_dir, slice_)
+        convertNsave(type, nifti_array[:, :, slice_], dicom_dir[slice_], out_dir, now_series, now_study, slice_)
 
 # Define directories
 nifti_dir_T1 = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/prediction-in-T1-dcm.nii'
@@ -74,26 +81,24 @@ dicom_dir_FLAIR = glob.glob("f:/Documenten/Universiteit/Master_TM+_commissies/Ja
 nifti2dicom('T1', nifti_dir_T1, dicom_dir_T1, out_dir_T1)
 nifti2dicom('FLAIR', nifti_dir_FLAIR, dicom_dir_FLAIR, out_dir_FLAIR)
 
-print(uuid1())
-
 # Compare DICOM metadata
 
-# T1_map = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/map18/map18_combined_z_score - 18003/IM-0001-0001-0001.dcm'
-# T1_prediction = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/DCM prediction FLAIR/slice1.dcm'
+T1_map = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/map18/map18_combined_z_score - 18003/IM-0001-0001-0001.dcm'
+T1_prediction = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/DCM prediction T1/slice1.dcm'
 
-# datasets = tuple([pydicom.dcmread(filename, force=True)
-#                   for filename in (T1_map, T1_prediction)])
+datasets = tuple([pydicom.dcmread(filename, force=True)
+                  for filename in (T1_map, T1_prediction)])
 
-# # difflib compare functions require a list of lines, each terminated with
-# # newline character massage the string representation of each dicom dataset
-# # into this form:
-# rep = []
-# for dataset in datasets:
-#     lines = str(dataset).split("\n")
-#     lines = [line + "\n" for line in lines]  # add the newline to end
-#     rep.append(lines)
+# difflib compare functions require a list of lines, each terminated with
+# newline character massage the string representation of each dicom dataset
+# into this form:
+rep = []
+for dataset in datasets:
+    lines = str(dataset).split("\n")
+    lines = [line + "\n" for line in lines]  # add the newline to end
+    rep.append(lines)
 
-# diff = difflib.Differ()
-# for line in diff.compare(rep[0], rep[1]):
-#     if line[0] != "?":
-#         print(line)
+diff = difflib.Differ()
+for line in diff.compare(rep[0], rep[1]):
+    if line[0] != "?":
+        print(line)
