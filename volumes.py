@@ -62,21 +62,22 @@ def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
     return ax.add_patch(ellipse)
 
 
-# Load file of current patient
+# Load file of new patient
 file_path = "C:/Users/joycerijs/freesurfer/subjects/bert/stats/aseg.stats"
-subcortical_file_bert = open(file_path)
-volume_dataframe_bert = pd.read_table(subcortical_file_bert, delim_whitespace=True, header=None, comment='#', usecols=[3, 4], names=[f'Volumes bert', 'Name of structure'])
-volume_index_bert = volume_dataframe_bert.set_index('Name of structure')
-transposed_bert = volume_index_bert.T
+subcortical_file_new = open(file_path)
+volume_dataframe_new = pd.read_table(subcortical_file_new, delim_whitespace=True, header=None, comment='#',
+                                     usecols=[3, 4], names=[f'Volumes new', 'Name of structure'])
+volume_index_new = volume_dataframe_new.set_index('Name of structure')
+transposed_new = volume_index_new.T
 string_icv = '# Measure EstimatedTotalIntraCranialVol'
 with open(file_path, 'r') as txtfile:
-        lines = txtfile.readlines()
-        for line in lines:
-            if line.find(string_icv) != -1:
-                split = line.split(', ')
-                icv_value = float(split[3])
-bert_volume_nor = transposed_bert.div(icv_value, axis=0)
-bert_volume_norm = bert_volume_nor.multiply(1000, axis=0)
+    lines = txtfile.readlines()
+    for line in lines:
+        if line.find(string_icv) != -1:
+            split = line.split(', ')
+            icv_value = float(split[3])
+new_volume_nor = transposed_new.div(icv_value, axis=0)
+new_volume_norm = new_volume_nor.multiply(1000, axis=0)
 
 # Path to normal database
 path = "F:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/map18 stats/volumestats/"
@@ -90,7 +91,9 @@ names_icv_values = []
 structures = []
 
 for i, j in enumerate(subcortical_files):
-    volume_dataframe = pd.read_table(open(join(path, subcortical_files[i])), delim_whitespace=True, header=None, comment='#', usecols=[3, 4], names=[f'Volumes {str(j)[16:20]}', 'Name of structure'])
+    volume_dataframe = pd.read_table(open(join(path, subcortical_files[i])), delim_whitespace=True, header=None,
+                                     comment='#', usecols=[3, 4], names=[f'Volumes {str(j)[16:20]}',
+                                     'Name of structure'])
     structures = list(volume_dataframe['Name of structure'])
     names_list.append(f'Volumes {str(j)[16:20]}')
     values_list.append(list(volume_dataframe[f'Volumes {str(j)[16:20]}']))
@@ -111,35 +114,23 @@ structures_of_interest = ['Hippocampus', 'Amygdala', 'Caudate', 'Thalamus-Proper
 for k in range(len(structures_of_interest)):
     ax = plt.subplot()
     ax.set_aspect('equal')
-    ax.scatter(x=volume_norm[f'Left-{structures_of_interest[k]}'], y=volume_norm[f'Right-{structures_of_interest[k]}'], alpha=0.5, label='Controls')
-    ax.scatter(x=bert_volume_norm[f'Left-{structures_of_interest[k]}'], y=bert_volume_norm[f'Right-{structures_of_interest[k]}'], alpha=0.5, label='Current patient', marker='*')
-    plt.title(f'{structures_of_interest[k]} Left vs. {structures_of_interest[k]} Right')
+    ax.scatter(x=volume_norm[f'Left-{structures_of_interest[k]}'], y=volume_norm[f'Right-{structures_of_interest[k]}'],
+               alpha=0.5, label='Controls')
+    ax.scatter(x=new_volume_norm[f'Left-{structures_of_interest[k]}'],
+               y=new_volume_norm[f'Right-{structures_of_interest[k]}'], alpha=0.5, label='Current patient', marker='*')
+    plt.title(f'{structures_of_interest[k]} Left vs. {structures_of_interest[k]} Right (ICV-normalized)')
     plt.xlabel(f'Volume left {structures_of_interest[k]} (mL)')
     plt.ylabel(f'Volume right {structures_of_interest[k]} (mL)')
-    min_value = (volume_norm[[f'Left-{structures_of_interest[k]}', f'Right-{structures_of_interest[k]}']].min(axis=1)).min(axis=0)
-    max_value = (volume_norm[[f'Left-{structures_of_interest[k]}', f'Right-{structures_of_interest[k]}']].max(axis=1)).max(axis=0)
-    confidence_ellipse(volume_norm[f'Left-{structures_of_interest[k]}'], volume_norm[f'Right-{structures_of_interest[k]}'], ax, n_std=2.0, label=r'$2\sigma$', edgecolor='blue', linestyle=':')
+    min_value = (volume_norm[[f'Left-{structures_of_interest[k]}',
+                 f'Right-{structures_of_interest[k]}']].min(axis=1)).min(axis=0)
+    max_value = (volume_norm[[f'Left-{structures_of_interest[k]}',
+                 f'Right-{structures_of_interest[k]}']].max(axis=1)).max(axis=0)
+    confidence_ellipse(volume_norm[f'Left-{structures_of_interest[k]}'],
+                       volume_norm[f'Right-{structures_of_interest[k]}'], ax, n_std=2.0, label=r'$2\sigma$',
+                       edgecolor='blue', linestyle=':')
     plt.legend()
     plt.xlim(min_value-0.25, max_value+0.25)
     plt.ylim(min_value-0.25, max_value+0.25)
     # plt.savefig(join(path, f'Left vs. Right-{structures_of_interest[k]} (ICV-normalized).jpg'))
     plt.show()
     plt.clf()
-
-
-# print('finish')
-
-# # # test = (open(join(path, subcortical_files[0])))
-# # # print(test.read())
-
-# # # # comment = '#' geeft aan dat de lijnen met # overgeslagen worden.
-# # # columns = volume_dataframe.columns.tolist()
-# # # columns = columns[-1:] + columns[:-1]
-# # # volume_dataframe = volume_dataframe[columns]
-
-# # # left_structures = volume_dataframe[volume_dataframe['Name of structure'].str.contains('Left')]
-# # # right_structures = volume_dataframe[volume_dataframe['Name of structure'].str.contains('Right')]
-
-# # # print(volume_dataframe)
-# # # # print(left_structures)
-# # # # print(right_structures)
