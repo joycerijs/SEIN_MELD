@@ -37,7 +37,7 @@ def convertNsave(type, arr, dicom_dir, file_dir, now_series, now_study, index=0)
         dicom_file.SeriesInstanceUID = SeriesInstanceUID + now_series
         dicom_file.SOPInstanceUID = dicom_file.SeriesInstanceUID[0:53] + (str(int(dicom_file.SeriesInstanceUID[53])+1))
         dicom_file.file_meta.MediaStorageSOPInstanceUID = dicom_file.SOPInstanceUID
-        dicom_file.StudyInstanceUID = SeriesInstanceUID + now_study  # Datum is nu op andere volgorde. De eerste getallen van seriesinstanceUID zijn hetzelfde als van study
+        dicom_file.StudyInstanceUID = SeriesInstanceUID + now_study
     if type == 'FLAIR':
         dicom_file.ImageType = "Derived/secondary/MELD_FLAIR_prediction"
         dicom_file.SeriesDescription = 'MELD_FLAIR_prediction'
@@ -63,10 +63,11 @@ def nifti2dicom(type, nifti_dir, dicom_dir, out_dir):
     nifti_array_ = nifti_file.get_fdata()
     nifti_array = np.rot90(np.fliplr(nifti_array_), 1)
     number_slices = nifti_array.shape[2]
-    now_series = datetime.datetime.now().strftime('%Y%m%d%H%M%S') # De actuele tijd wordt 1x berekend en voor alle slices gebruikt
+    now_series = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     now_study = datetime.datetime.now().strftime('%S%M%H%d%m%Y')
     for slice_ in tqdm(range(number_slices)):
         convertNsave(type, nifti_array[:, :, slice_], dicom_dir[slice_], out_dir, now_series, now_study, slice_)
+
 
 # Define directories
 nifti_dir_T1 = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/prediction-in-T1-dcm.nii'

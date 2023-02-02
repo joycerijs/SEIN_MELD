@@ -13,23 +13,13 @@ def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
     """
     Create a plot of the covariance confidence ellipse of *x* and *y*.
 
-    Parameters
-    ----------
-    x, y : array-like, shape (n, )
-        Input data.
+    Parameters:
+    x, y : array-like, shape (n, ): Input data.
+    ax : matplotlib.axes.Axes: The axes object to draw the ellipse into.
+    n_std : float: The number of standard deviations to determine the ellipse's radiuses.
+    **kwargs: Forwarded to `~matplotlib.patches.Ellipse`
 
-    ax : matplotlib.axes.Axes
-        The axes object to draw the ellipse into.
-
-    n_std : float
-        The number of standard deviations to determine the ellipse's radiuses.
-
-    **kwargs
-        Forwarded to `~matplotlib.patches.Ellipse`
-
-    Returns
-    -------
-    matplotlib.patches.Ellipse
+    Returns: matplotlib.patches.Ellipse
     """
     if x.size != y.size:
         raise ValueError("x and y must be the same size")
@@ -49,7 +39,7 @@ def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
     scale_x = np.sqrt(cov[0, 0]) * n_std
     mean_x = np.mean(x)
 
-    # calculating the standard deviation of y ...
+    # calculating the standard deviation of y
     scale_y = np.sqrt(cov[1, 1]) * n_std
     mean_y = np.mean(y)
 
@@ -119,8 +109,8 @@ for k in range(len(structures_of_interest)):
     ax.scatter(x=new_volume_norm[f'Left-{structures_of_interest[k]}'],
                y=new_volume_norm[f'Right-{structures_of_interest[k]}'], alpha=0.5, label='Current patient', marker='*')
     plt.title(f'{structures_of_interest[k]} Left vs. {structures_of_interest[k]} Right (ICV-normalized)')
-    plt.xlabel(f'Volume left {structures_of_interest[k]} (mL)')
-    plt.ylabel(f'Volume right {structures_of_interest[k]} (mL)')
+    plt.xlabel(f'Volume Left {structures_of_interest[k]} (mL)')
+    plt.ylabel(f'Volume Right {structures_of_interest[k]} (mL)')
     min_value = (volume_norm[[f'Left-{structures_of_interest[k]}',
                  f'Right-{structures_of_interest[k]}']].min(axis=1)).min(axis=0)
     max_value = (volume_norm[[f'Left-{structures_of_interest[k]}',
