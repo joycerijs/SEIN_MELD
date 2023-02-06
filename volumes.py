@@ -11,7 +11,7 @@ import matplotlib.transforms as transforms
 
 def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
     """
-    Create a plot of the covariance confidence ellipse of *x* and *y*.
+    This function creates a plot of the covariance confidence ellipse of *x* and *y*.
 
     Parameters:
     x, y : array-like, shape (n, ): Input data.
@@ -94,7 +94,6 @@ for i, j in enumerate(subcortical_files):
             if line.find(string_icv) != -1:
                 split = line.split(', ')
                 icv_values.append(float(split[3]))
-
 volume_df = pd.DataFrame(np.array(values_list), columns=structures, index=names_list)
 volume_df['IntraCranialVolume'] = icv_values
 volume_nor = volume_df.div(volume_df.IntraCranialVolume, axis=0)
