@@ -7,10 +7,12 @@ from tqdm import tqdm
 import glob
 import difflib
 import datetime
+import os
 
 
 def convertNsave(type, arr, dicom_dir, file_dir, now_series, now_study, index=0):
     """
+    This funtion converts one nifti slice into a DICOM file and changes the metadata.
     'type': Parameter defines if it is the T1 or FLAIR prediction
     'arr': Parameter will take a numpy array that represents only one slice.
     'file_dir': Parameter will take the path to save the slices
@@ -47,12 +49,12 @@ def convertNsave(type, arr, dicom_dir, file_dir, now_series, now_study, index=0)
         dicom_file.file_meta.MediaStorageSOPInstanceUID = dicom_file.SOPInstanceUID
         dicom_file.StudyInstanceUID = SeriesInstanceUID + now_study + '1'
     dicom_file.PixelData = arr.tobytes()
-    # dicom_file.save_as(os.path.join(file_dir, f'slice{index+1}.dcm'))
+    dicom_file.save_as(os.path.join(file_dir, f'slice{index+1}.dcm'))
 
 
 def nifti2dicom(type, nifti_dir, dicom_dir, out_dir):
     """
-    This function is to convert one nifti file into dicom series
+    This function is to convert one nifti file into dicom series.
     'type': Defines if it is the T1 or FLAIR prediction
     'nifti_dir': Parameter defines the path to the nifti file
     'out_dir': Parameter defines the path to output
@@ -81,24 +83,24 @@ dicom_dir_FLAIR = glob.glob("f:/Documenten/Universiteit/Master_TM+_commissies/Ja
 nifti2dicom('T1', nifti_dir_T1, dicom_dir_T1, out_dir_T1)
 nifti2dicom('FLAIR', nifti_dir_FLAIR, dicom_dir_FLAIR, out_dir_FLAIR)
 
-# Compare DICOM metadata
+# # Compare DICOM metadata
 
-T1_map = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/map18/map18_combined_z_score - 18003/IM-0001-0001-0001.dcm'
-T1_prediction = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/DCM prediction T1/slice1.dcm'
+# T1_map = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/map18/map18_combined_z_score - 18003/IM-0001-0001-0001.dcm'
+# T1_prediction = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/DCM prediction T1/slice1.dcm'
 
-datasets = tuple([pydicom.dcmread(filename, force=True)
-                  for filename in (T1_map, T1_prediction)])
+# datasets = tuple([pydicom.dcmread(filename, force=True)
+#                   for filename in (T1_map, T1_prediction)])
 
-# difflib compare functions require a list of lines, each terminated with
-# newline character massage the string representation of each dicom dataset
-# into this form:
-rep = []
-for dataset in datasets:
-    lines = str(dataset).split("\n")
-    lines = [line + "\n" for line in lines]  # add the newline to end
-    rep.append(lines)
+# # difflib compare functions require a list of lines, each terminated with
+# # newline character massage the string representation of each dicom dataset
+# # into this form:
+# rep = []
+# for dataset in datasets:
+#     lines = str(dataset).split("\n")
+#     lines = [line + "\n" for line in lines]  # add the newline to end
+#     rep.append(lines)
 
-diff = difflib.Differ()
-for line in diff.compare(rep[0], rep[1]):
-    if line[0] != "?":
-        print(line)
+# diff = difflib.Differ()
+# for line in diff.compare(rep[0], rep[1]):
+#     if line[0] != "?":
+#         print(line)
