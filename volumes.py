@@ -53,7 +53,7 @@ def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
 
 
 # Load file of new patient
-file_path = "C:/Users/joycerijs/freesurfer/subjects/bert/stats/aseg.stats"
+file_path = "F:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/map18 stats/MELD_H31_3T_FCD_0004_aseg.stats"
 subcortical_file_new = open(file_path)
 volume_dataframe_new = pd.read_table(subcortical_file_new, delim_whitespace=True, header=None, comment='#',
                                      usecols=[3, 4], names=[f'Volumes new', 'Name of structure'])
