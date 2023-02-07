@@ -42,7 +42,7 @@ def convertNsave(type, arr, dicom_dir, file_dir, now, index=0):
         dicom_file.SOPInstanceUID = dicom_file.SeriesInstanceUID[0:53] + (str(int(dicom_file.SeriesInstanceUID[53])+1))
         dicom_file.file_meta.MediaStorageSOPInstanceUID = dicom_file.SOPInstanceUID
     if type == 'FLAIR':
-        dicom_file.ImageType = "Derived/secondary/MELD_probFCD_FLAIR"
+        dicom_file.ImageType = "Derived/secondary/MELD_probFCD_FLAIR"  # warning dat dit type max 16 bits mag zijn. Maar bij map18 gaat het ook goed
         dicom_file.SeriesDescription = 'MELD_probFCD_FLAIR'
         dicom_file.ProtocolName = 'MELD_probFCD_FLAIR'
         dicom_file.SeriesInstanceUID = SeriesInstanceUID + now + '1'
