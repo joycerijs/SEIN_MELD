@@ -97,9 +97,9 @@ for i, j in enumerate(subcortical_files):
 volume_df = pd.DataFrame(np.array(values_list), columns=structures, index=names_list)
 volume_df['IntraCranialVolume'] = icv_values
 volume_nor = volume_df.div(volume_df.IntraCranialVolume, axis=0)
-volume_norm = volume_nor.multiply(1000, axis=0)
-
-structures_of_interest = ['Hippocampus', 'Amygdala', 'Caudate', 'Thalamus-Proper', 'Putamen']
+volume_norm = volume_nor.multiply(1000, axis=0) # convert to mL
+# , 'Caudate', 'Thalamus-Proper', 'Putamen'
+structures_of_interest = ['Hippocampus', 'Amygdala']
 for k in range(len(structures_of_interest)):
     ax = plt.subplot()
     ax.set_aspect('equal')
@@ -110,6 +110,7 @@ for k in range(len(structures_of_interest)):
     plt.title(f'{structures_of_interest[k]} Left vs. {structures_of_interest[k]} Right (ICV-normalized)')
     plt.xlabel(f'Volume Left {structures_of_interest[k]} (mL)')
     plt.ylabel(f'Volume Right {structures_of_interest[k]} (mL)')
+    # Find the min and max volume value to use for the x and y axes
     min_value = (volume_norm[[f'Left-{structures_of_interest[k]}',
                  f'Right-{structures_of_interest[k]}']].min(axis=1)).min(axis=0)
     max_value = (volume_norm[[f'Left-{structures_of_interest[k]}',
@@ -118,8 +119,10 @@ for k in range(len(structures_of_interest)):
                        volume_norm[f'Right-{structures_of_interest[k]}'], ax, n_std=2.0, label=r'$2\sigma$',
                        edgecolor='blue', linestyle=':')
     plt.legend()
+    # Set axes from the minimum volume value -0.25 to the maximum volume value +0.25
     plt.xlim(min_value-0.25, max_value+0.25)
     plt.ylim(min_value-0.25, max_value+0.25)
+    # Uncomment below to save the figures
     # plt.savefig(join(path, f'Left vs. Right-{structures_of_interest[k]} (ICV-normalized).jpg'))
     plt.show()
     plt.clf()
