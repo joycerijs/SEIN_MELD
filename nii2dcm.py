@@ -8,9 +8,10 @@ import glob
 import difflib
 import datetime
 import os
+import pydicom
 
 
-def convertNsave(type, arr, dicom_dir, file_dir, now_series, now_study, index=0):
+def convertNsave(type, arr, dicom_dir, file_dir, now, index=0):
     """
     This funtion converts one nifti slice into a DICOM file and changes the metadata.
     'type': Parameter defines if it is the T1 or FLAIR prediction
@@ -36,18 +37,16 @@ def convertNsave(type, arr, dicom_dir, file_dir, now_series, now_study, index=0)
         dicom_file.ImageType = "Derived/secondary/MELD_T1_prediction"
         dicom_file.SeriesDescription = 'MELD_T1_prediction'
         dicom_file.ProtocolName = 'MELD_T1_prediction'
-        dicom_file.SeriesInstanceUID = SeriesInstanceUID + now_series
+        dicom_file.SeriesInstanceUID = SeriesInstanceUID + now
         dicom_file.SOPInstanceUID = dicom_file.SeriesInstanceUID[0:53] + (str(int(dicom_file.SeriesInstanceUID[53])+1))
         dicom_file.file_meta.MediaStorageSOPInstanceUID = dicom_file.SOPInstanceUID
-        dicom_file.StudyInstanceUID = SeriesInstanceUID + now_study
     if type == 'FLAIR':
         dicom_file.ImageType = "Derived/secondary/MELD_FLAIR_prediction"
         dicom_file.SeriesDescription = 'MELD_FLAIR_prediction'
         dicom_file.ProtocolName = 'MELD_FLAIR_prediction'
-        dicom_file.SeriesInstanceUID = SeriesInstanceUID + now_series + '1'
+        dicom_file.SeriesInstanceUID = SeriesInstanceUID + now + '1'
         dicom_file.SOPInstanceUID = dicom_file.SeriesInstanceUID[0:53] + (str(int(dicom_file.SeriesInstanceUID[53])+1)) + '1'
         dicom_file.file_meta.MediaStorageSOPInstanceUID = dicom_file.SOPInstanceUID
-        dicom_file.StudyInstanceUID = SeriesInstanceUID + now_study + '1'
     dicom_file.PixelData = arr.tobytes()
     dicom_file.save_as(os.path.join(file_dir, f'slice{index+1}.dcm'))
 
@@ -60,15 +59,14 @@ def nifti2dicom(type, nifti_dir, dicom_dir, out_dir):
     'out_dir': Parameter defines the path to output
     'dicom dir': Parameter defines directory of original dicom file
     """
-
     nifti_file = nibabel.load(nifti_dir)
     nifti_array_ = nifti_file.get_fdata()
-    nifti_array = np.rot90(np.fliplr(nifti_array_), 1)
+    nifti_array = np.rot90(np.fliplr(nifti_array_), 1) 
     number_slices = nifti_array.shape[2]
-    now_series = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-    now_study = datetime.datetime.now().strftime('%S%M%H%d%m%Y')
+    now = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+
     for slice_ in tqdm(range(number_slices)):
-        convertNsave(type, nifti_array[:, :, slice_], dicom_dir[slice_], out_dir, now_series, now_study, slice_)
+        convertNsave(type, nifti_array[:, :, slice_], dicom_dir[slice_], out_dir, now, slice_)
 
 
 # Define directories
