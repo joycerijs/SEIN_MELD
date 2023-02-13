@@ -4,3 +4,4 @@ This repository contains all the files created for the internship of Joyce Rijs 
 
 nii2dcm.py contains the code to convert a NifTI file to a DICOM file and alter the metadata.
 volumes.py contains the code to read freesurfer .stats files of subcortical structures and create scatter plots of the volumes of the left vs. right structure, normalized by total intracranial volume, including a confidence ellipse.
+pip-freeze.txt contains information about the package versions that were used during this project.
