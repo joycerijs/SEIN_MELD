@@ -49,6 +49,7 @@ def convertNsave(type, arr, dicom_dir, file_dir, now, index=0):
         dicom_file.SOPInstanceUID = dicom_file.SeriesInstanceUID[0:53] + (str(int(dicom_file.SeriesInstanceUID[53])+1)) + '1'
         dicom_file.file_meta.MediaStorageSOPInstanceUID = dicom_file.SOPInstanceUID
     dicom_file.PixelData = arr.tobytes()
+    # Save the DICOM slices
     dicom_file.save_as(os.path.join(file_dir, f'slice{index+1}.dcm'))
 
 
@@ -84,22 +85,22 @@ nifti2dicom('FLAIR', nifti_dir_FLAIR, dicom_dir_FLAIR, out_dir_FLAIR)
 
 # # Compare DICOM metadata
 
-T1_map = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/map18/map18_combined_z_score - 18003/IM-0001-0001-0001.dcm'
-T1_prediction = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/DCM prediction T1/slice1.dcm'
+# T1_map = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/map18/map18_combined_z_score - 18003/IM-0001-0001-0001.dcm'
+# T1_prediction = 'f:/Documenten/Universiteit/Master_TM+_commissies/Jaar 2/Stages/Stage 4/Bestanden voor project/DCM prediction T1/slice1.dcm'
 
-datasets = tuple([pydicom.dcmread(filename, force=True)
-                  for filename in (T1_map, T1_prediction)])
+# datasets = tuple([pydicom.dcmread(filename, force=True)
+#                   for filename in (T1_map, T1_prediction)])
 
-# difflib compare functions require a list of lines, each terminated with
-# newline character massage the string representation of each dicom dataset
-# into this form:
-rep = []
-for dataset in datasets:
-    lines = str(dataset).split("\n")
-    lines = [line + "\n" for line in lines]  # add the newline to end
-    rep.append(lines)
+# # difflib compare functions require a list of lines, each terminated with
+# # newline character massage the string representation of each dicom dataset
+# # into this form:
+# rep = []
+# for dataset in datasets:
+#     lines = str(dataset).split("\n")
+#     lines = [line + "\n" for line in lines]  # add the newline to end
+#     rep.append(lines)
 
-diff = difflib.Differ()
-for line in diff.compare(rep[0], rep[1]):
-    if line[0] != "?":
-        print(line)
+# diff = difflib.Differ()
+# for line in diff.compare(rep[0], rep[1]):
+#     if line[0] != "?":
+#         print(line)

@@ -98,8 +98,9 @@ volume_df = pd.DataFrame(np.array(values_list), columns=structures, index=names_
 volume_df['IntraCranialVolume'] = icv_values
 volume_nor = volume_df.div(volume_df.IntraCranialVolume, axis=0)
 volume_norm = volume_nor.multiply(1000, axis=0) # convert to mL
-# , 'Caudate', 'Thalamus-Proper', 'Putamen'
-structures_of_interest = ['Hippocampus', 'Amygdala']
+
+# Define structures of interest and create figures
+structures_of_interest = ['Hippocampus', 'Amygdala', 'Caudate', 'Thalamus-Proper', 'Putamen']
 for k in range(len(structures_of_interest)):
     ax = plt.subplot()
     ax.set_aspect('equal')
